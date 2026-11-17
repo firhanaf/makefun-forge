@@ -52,6 +52,11 @@ For local testing outside a trial, set `FORGE_LISTEN=127.0.0.1:8081` (and option
 
 ## Design notes
 
+- **HTTP.** A lean HTTP/1.1 front end (`go/httpd.go`) parses requests with `http.ReadRequest`,
+  buffers each response and sends it with one write. It skips the background read that net/http's
+  server starts for every request, which roughly halves the forge's CPU per request on a keep-alive
+  connection. REST JSON is encoded without reflection, byte for byte as `encoding/json` would.
+
 - **Git objects.** Objects live in one content-addressed store shared by all repositories. Each
   object's zlib stream is computed once and reused by every pack that contains it.
 - **Fetch.** Fetch answers are cached per repository ref generation and per request, and built once
