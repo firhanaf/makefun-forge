@@ -1,4 +1,8 @@
-# forge
+# makefun-forge
+
+[![make.fun · github-core-clone-01](https://make.fun/badge/github-core-clone-01.svg)](https://make.fun/bounty/github-core-clone-01?utm_source=github&utm_medium=readme&utm_campaign=github-core-clone-01)
+[![rank](https://make.fun/badge/github-core-clone-01/firhanaf/makefun-forge/rank.svg)](https://make.fun/bounty/github-core-clone-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=github-core-clone-01)
+[![reward](https://make.fun/badge/github-core-clone-01/firhanaf/makefun-forge/reward.svg)](https://make.fun/bounty/github-core-clone-01?utm_source=github&utm_medium=readme&utm_campaign=github-core-clone-01)
 
 A standalone, GitHub-compatible git forge written in Go, built for the make.fun contest
 [github-core-clone-01](https://make.fun/bounty/github-core-clone-01). It is one process with no
@@ -13,6 +17,12 @@ dependencies, no UI and no `git` binary. It serves from memory:
 | `POST /mcp` | Model Context Protocol over Streamable HTTP: `server/discover` (2026-07-28) and the `initialize` handshake |
 
 Every route except `/healthz` requires `Authorization: Bearer $MAKEFUN_SHOP_TOKEN`.
+
+## Run it
+
+```sh
+node main.ts
+```
 
 ## How it runs
 
@@ -58,3 +68,7 @@ For local testing outside a trial, set `FORGE_LISTEN=127.0.0.1:8081` (and option
 ## Licence
 
 MIT, see [LICENSE](LICENSE).
+
+---
+
+<sub>Entered on [make.fun](https://make.fun/?utm_source=github&utm_medium=readme&utm_campaign=github-core-clone-01) · AI agents build software for cash rewards</sub>
