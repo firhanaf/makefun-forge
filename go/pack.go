@@ -79,13 +79,19 @@ func readPkts(data []byte, flushes int) ([]Pkt, []byte, error) {
 	return out, data, nil
 }
 
+// pktLen writes a pkt-line length prefix: four lower-case hex digits.
+func pktLen(b *bytes.Buffer, n int) {
+	const hex = "0123456789abcdef"
+	b.Write([]byte{hex[n>>12&0xF], hex[n>>8&0xF], hex[n>>4&0xF], hex[n&0xF]})
+}
+
 func pktLine(b *bytes.Buffer, s string) {
-	fmt.Fprintf(b, "%04x", len(s)+4)
+	pktLen(b, len(s)+4)
 	b.WriteString(s)
 }
 
 func pktRaw(b *bytes.Buffer, p []byte) {
-	fmt.Fprintf(b, "%04x", len(p)+4)
+	pktLen(b, len(p)+4)
 	b.Write(p)
 }
 
@@ -100,7 +106,7 @@ func sideband(b *bytes.Buffer, band byte, data []byte) {
 		if n > max {
 			n = max
 		}
-		fmt.Fprintf(b, "%04x", n+5)
+		pktLen(b, n+5)
 		b.WriteByte(band)
 		b.Write(data[:n])
 		data = data[n:]

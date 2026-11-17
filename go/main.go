@@ -21,8 +21,9 @@ import (
 
 type Server struct {
 	st      *Store
-	reqSeq  atomic.Int64
-	started time.Time
+	reqSeq   atomic.Int64
+	started  time.Time
+	idPrefix string // "F0RG:<pid>:" of every X-GitHub-Request-Id
 }
 
 func newGzipReader(r io.Reader) (io.ReadCloser, error) { return gzip.NewReader(r) }
@@ -31,7 +32,25 @@ func itoa(n int) string { return strconv.Itoa(n) }
 
 func (s *Server) requestID() string {
 	n := s.reqSeq.Add(1)
-	return fmt.Sprintf("F0RG:%04X:%06X:%08X", os.Getpid()&0xffff, n>>24, n&0xffffffff)
+	b := make([]byte, 0, 26)
+	b = append(b, s.idPrefix...)
+	b = appendHexPad(b, uint64(n>>24), 6)
+	b = append(b, ':')
+	b = appendHexPad(b, uint64(n&0xffffffff), 8)
+	return string(b)
+}
+
+// appendHexPad appends v in upper-case hex, zero-padded to width digits.
+func appendHexPad(b []byte, v uint64, width int) []byte {
+	const digits = "0123456789ABCDEF"
+	var tmp [16]byte
+	i := len(tmp)
+	for v > 0 || len(tmp)-i < width {
+		i--
+		tmp[i] = digits[v&0xF]
+		v >>= 4
+	}
+	return append(b, tmp[i:]...)
 }
 
 // authorized answers whether the request carries the trial's bearer token.
@@ -113,7 +132,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func writeJSON(w http.ResponseWriter, status int, v any) {
-	body, err := json.Marshal(v)
+	body, err := appendJSON(make([]byte, 0, 1024), v)
 	if err != nil {
 		body = []byte(`{"message":"encoding failed"}`)
 		status = http.StatusInternalServerError
@@ -202,7 +221,8 @@ func main() {
 		fmt.Fprintf(os.Stderr, "[forge] listen: %v\n", err)
 		os.Exit(1)
 	}
-	srv := &Server{st: newStore(os.Getenv("MAKEFUN_SHOP_TOKEN")), started: time.Now()}
+	srv := &Server{st: newStore(os.Getenv("MAKEFUN_SHOP_TOKEN")), started: time.Now(),
+		idPrefix: fmt.Sprintf("F0RG:%04X:", os.Getpid()&0xffff)}
 	httpServer := &http.Server{
 		Handler:           srv,
 		ReadHeaderTimeout: 30 * time.Second,
