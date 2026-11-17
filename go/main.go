@@ -11,6 +11,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"runtime"
 	"runtime/debug"
 	"strconv"
 	"strings"
@@ -182,6 +183,7 @@ func waitDone(client *http.Client, base string) {
 }
 
 func main() {
+	fitGOMAXPROCS()
 	// The pod has 1 GiB shared with the suite: collect harder before the forge gets near it.
 	if os.Getenv("GOMEMLIMIT") == "" {
 		debug.SetMemoryLimit(640 << 20)
@@ -209,7 +211,7 @@ func main() {
 	}
 	go httpServer.Serve(ln)
 	port := ln.Addr().(*net.TCPAddr).Port
-	fmt.Fprintf(os.Stderr, "[forge] listening on %d\n", port)
+	fmt.Fprintf(os.Stderr, "[forge] listening on %d (GOMAXPROCS %d)\n", port, runtime.GOMAXPROCS(0))
 	if base == "" {
 		select {}
 	}
