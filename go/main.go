@@ -188,6 +188,10 @@ func main() {
 	if os.Getenv("GOMEMLIMIT") == "" {
 		debug.SetMemoryLimit(640 << 20)
 	}
+	// The live heap is small next to that limit: collect less often (the limit still bounds the heap).
+	if os.Getenv("GOGC") == "" {
+		debug.SetGCPercent(400)
+	}
 	base := envURL()
 	listenAddr := "0.0.0.0:0"
 	if v := os.Getenv("FORGE_LISTEN"); v != "" {
