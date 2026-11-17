@@ -68,11 +68,20 @@ func quotaCPUs(quota, period string) int {
 	return n
 }
 
+// podCPUs is the contest pod's CPU limit, the cap when no quota is visible. A sandbox such as gVisor
+// may show the host's cores and no cgroup files, and a runtime sized to the host would then run many
+// threads in a 2-CPU pod and be throttled together with everything else in it.
+const podCPUs = 2
+
 func fitGOMAXPROCS() {
 	if os.Getenv("GOMAXPROCS") != "" {
 		return
 	}
-	if n := cgroupCPUs(); n > 0 && n < runtime.NumCPU() {
+	n := cgroupCPUs()
+	if n <= 0 {
+		n = podCPUs
+	}
+	if n < runtime.NumCPU() {
 		runtime.GOMAXPROCS(n)
 	}
 }
