@@ -1,0 +1,15 @@
+{
+  "name": "forge",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A GitHub-compatible git forge in Go: smart HTTP (v2 upload-pack, v0 receive-pack), REST v3, GraphQL v4 and MCP, served from memory",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "start": "node main.ts",
+    "build": "cd go && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags \"-s -w\" -o ../bin/forge ."
+  }
+}
