@@ -203,13 +203,7 @@ func main() {
 		os.Exit(1)
 	}
 	srv := &Server{st: newStore(os.Getenv("MAKEFUN_SHOP_TOKEN")), started: time.Now()}
-	httpServer := &http.Server{
-		Handler:           srv,
-		ReadHeaderTimeout: 30 * time.Second,
-		IdleTimeout:       120 * time.Second,
-		MaxHeaderBytes:    1 << 20,
-	}
-	go httpServer.Serve(ln)
+	go serveHTTP1(ln, srv)
 	port := ln.Addr().(*net.TCPAddr).Port
 	fmt.Fprintf(os.Stderr, "[forge] listening on %d (GOMAXPROCS %d)\n", port, runtime.GOMAXPROCS(0))
 	if base == "" {
@@ -218,6 +212,6 @@ func main() {
 	client := &http.Client{Timeout: 30 * time.Second}
 	register(client, base, port)
 	waitDone(client, base)
-	httpServer.Close()
+	ln.Close()
 	os.Exit(0)
 }
